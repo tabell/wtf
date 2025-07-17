@@ -162,9 +162,14 @@ func (widget *Widget) fetchForFeed(feedURL string) ([]*FeedItem, error) {
 			break
 		}
 
+		sourceTitle := feed.Title
+		if alias, ok := widget.settings.aliases[feedURL]; ok {
+			sourceTitle = alias
+		}
+
 		feedItem := &FeedItem{
 			item:        gofeedItem,
-			sourceTitle: feed.Title,
+			sourceTitle: sourceTitle,
 			viewed:      false,
 		}
 
