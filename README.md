@@ -235,7 +235,7 @@ feedreader:
   feeds:
     - https://feeds.bbci.co.uk/news/rss.xml
   feedAliases:
-    https://feeds.bbci.co.uk/news/rss.xml: BBC
+    "https://feeds.bbci.co.uk/news/rss.xml": BBC
 ```
 
 ## Getting Bugs Fixed or Features Added
