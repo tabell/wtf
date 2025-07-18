@@ -87,6 +87,9 @@ func NewWidget(tviewApp *tview.Application, redrawChan chan bool, pages *tview.P
 	widget.SetRenderFunction(widget.Render)
 	widget.initializeKeyboardControls()
 
+	widget.View.SetWrap(true)
+	widget.View.SetWordWrap(true)
+
 	return widget
 }
 
@@ -198,14 +201,19 @@ func (widget *Widget) content() (string, string, bool) {
 
 		displayText := widget.getShowText(feedItem, rowColor)
 
-		row := fmt.Sprintf(
-			"[%s]%2d. %s[white]",
-			rowColor,
-			idx+1,
-			displayText,
-		)
+		lines := strings.Split(displayText, "\n")
+		if widget.settings.maxHeight > 0 && len(lines) > widget.settings.maxHeight {
+			lines = lines[:widget.settings.maxHeight]
+		}
 
-		str += utils.HighlightableHelper(widget.View, row, idx, len(feedItem.item.Title))
+		if len(lines) > 0 {
+			lines[0] = fmt.Sprintf("[%s]%2d. %s[white]", rowColor, idx+1, lines[0])
+			for i := 1; i < len(lines); i++ {
+				lines[i] = fmt.Sprintf("[%s]%s[white]", rowColor, lines[i])
+			}
+		}
+
+		str += utils.HighlightableBlockHelper(widget.View, lines, idx)
 	}
 
 	return title, str, false
