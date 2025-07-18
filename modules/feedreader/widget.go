@@ -202,6 +202,12 @@ func (widget *Widget) content() (string, string, bool) {
 		displayText := widget.getShowText(feedItem, rowColor)
 
 		lines := strings.Split(displayText, "\n")
+
+		moveTitle := widget.settings.maxHeight == 0 || widget.settings.maxHeight >= 2
+		if moveTitle && len(lines) > 0 {
+			lines = append([]string{""}, lines...)
+		}
+
 		if widget.settings.maxHeight > 0 && len(lines) > widget.settings.maxHeight {
 			lines = lines[:widget.settings.maxHeight]
 		}
@@ -210,9 +216,16 @@ func (widget *Widget) content() (string, string, bool) {
 		}
 
 		if len(lines) > 0 {
-			lines[0] = fmt.Sprintf("[%s]%2d. %s[white]", rowColor, idx+1, lines[0])
-			for i := 1; i < len(lines); i++ {
-				lines[i] = fmt.Sprintf("[%s]%s[white]", rowColor, lines[i])
+			if moveTitle {
+				lines[0] = fmt.Sprintf("[%s]%2d.[white]", rowColor, idx+1)
+				for i := 1; i < len(lines); i++ {
+					lines[i] = fmt.Sprintf("[%s]%s[white]", rowColor, lines[i])
+				}
+			} else {
+				lines[0] = fmt.Sprintf("[%s]%2d. %s[white]", rowColor, idx+1, lines[0])
+				for i := 1; i < len(lines); i++ {
+					lines[i] = fmt.Sprintf("[%s]%s[white]", rowColor, lines[i])
+				}
 			}
 		}
 
