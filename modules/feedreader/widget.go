@@ -233,17 +233,27 @@ func (widget *Widget) getShowText(feedItem *FeedItem, rowColor string) string {
 		publishDate = "[" + widget.settings.publishDate + "]" + feedItem.item.PublishedParsed.Format(widget.settings.dateFormat) + " "
 	}
 
+	base := source + publishDate
+
 	// Convert any escaped characters to their character representation
-	title = html.UnescapeString(source + publishDate + "[" + rowColor + "]" + title)
+	coloredTitle := html.UnescapeString("[" + rowColor + "]" + title)
+	base = html.UnescapeString(base)
 
 	switch widget.showType {
 	case SHOW_LINK:
 		return feedItem.item.Link
 	case SHOW_CONTENT:
 		text, _ := html2text.FromString(feedItem.item.Content, html2text.Options{PrettyTables: true})
-		return strings.TrimSpace(title + "\n" + strings.TrimSpace(text))
+		return strings.TrimSpace(coloredTitle + "\n" + strings.TrimSpace(text))
 	default:
-		return title
+		if widget.CommonSettings().Height >= 2 {
+			base = strings.TrimSpace(base)
+			if base != "" {
+				base += "\n"
+			}
+			return base + coloredTitle
+		}
+		return base + coloredTitle
 	}
 }
 
