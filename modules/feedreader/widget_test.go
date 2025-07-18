@@ -115,5 +115,5 @@ func Test_widget_content_block(t *testing.T) {
 
 	assert.Equal(t, w.CommonSettings().Title, title)
 	assert.Equal(t, expected, content)
-	assert.Equal(t, false, wrap)
+	assert.Equal(t, true, wrap)
 }

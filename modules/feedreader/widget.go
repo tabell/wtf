@@ -216,7 +216,7 @@ func (widget *Widget) content() (string, string, bool) {
 		str += utils.HighlightableBlockHelper(widget.View, lines, idx)
 	}
 
-	return title, str, false
+	return title, str, true
 }
 
 func (widget *Widget) getShowText(feedItem *FeedItem, rowColor string) string {
