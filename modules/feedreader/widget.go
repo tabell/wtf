@@ -205,6 +205,9 @@ func (widget *Widget) content() (string, string, bool) {
 		if widget.settings.maxHeight > 0 && len(lines) > widget.settings.maxHeight {
 			lines = lines[:widget.settings.maxHeight]
 		}
+		for len(lines) < widget.settings.minHeight {
+			lines = append(lines, "")
+		}
 
 		if len(lines) > 0 {
 			lines[0] = fmt.Sprintf("[%s]%2d. %s[white]", rowColor, idx+1, lines[0])

@@ -117,3 +117,22 @@ func Test_widget_content_block(t *testing.T) {
 	assert.Equal(t, expected, content)
 	assert.Equal(t, true, wrap)
 }
+
+func Test_widget_content_min_height(t *testing.T) {
+	app := tview.NewApplication()
+	w := NewWidget(app, make(chan bool), tview.NewPages(), &Settings{Common: &cfg.Common{}, minHeight: 2})
+	w.showType = SHOW_TITLE
+	w.stories = []*FeedItem{
+		{
+			item: &gofeed.Item{
+				Title: "Cats",
+			},
+		},
+	}
+
+	_, content, _ := w.content()
+
+	expectedLines := 2
+	actualLines := strings.Count(content, "\n")
+	assert.Equal(t, expectedLines, actualLines)
+}
