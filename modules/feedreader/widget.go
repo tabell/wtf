@@ -196,24 +196,36 @@ func (widget *Widget) content() (string, string, bool) {
 			}
 		}
 
-		displayText := widget.getShowText(feedItem, rowColor)
+		firstLine, secondLine := widget.getShowLines(feedItem, rowColor)
 
 		row := fmt.Sprintf(
 			"[%s]%2d. %s[white]",
 			rowColor,
 			idx+1,
-			displayText,
+			firstLine,
 		)
 
-		str += utils.HighlightableHelper(widget.View, row, idx, len(feedItem.item.Title))
+		str += utils.HighlightableHelper(widget.View, row, idx, len(firstLine))
+
+		str += utils.HighlightableHelper(widget.View, secondLine, idx, len(secondLine))
 	}
 
 	return title, str, false
 }
 
 func (widget *Widget) getShowText(feedItem *FeedItem, rowColor string) string {
+	first, second := widget.getShowLines(feedItem, rowColor)
+
+	if second == "" {
+		return first
+	}
+
+	return first + "\n" + second
+}
+
+func (widget *Widget) getShowLines(feedItem *FeedItem, rowColor string) (string, string) {
 	if feedItem == nil {
-		return ""
+		return "", ""
 	}
 
 	space := regexp.MustCompile(`\s+`)
@@ -228,17 +240,20 @@ func (widget *Widget) getShowText(feedItem *FeedItem, rowColor string) string {
 		publishDate = "[" + widget.settings.publishDate + "]" + feedItem.item.PublishedParsed.Format(widget.settings.dateFormat) + " "
 	}
 
-	// Convert any escaped characters to their character representation
 	title = html.UnescapeString(source + publishDate + "[" + rowColor + "]" + title)
 
 	switch widget.showType {
 	case SHOW_LINK:
-		return feedItem.item.Link
+		return feedItem.item.Link, ""
 	case SHOW_CONTENT:
 		text, _ := html2text.FromString(feedItem.item.Content, html2text.Options{PrettyTables: true})
-		return strings.TrimSpace(title + "\n" + strings.TrimSpace(text))
+		snippet := strings.TrimSpace(strings.ReplaceAll(text, "\n", " "))
+		if len(snippet) > 80 {
+			snippet = snippet[:80] + "..."
+		}
+		return title, snippet
 	default:
-		return title
+		return feedItem.item.Link, title
 	}
 }
 
