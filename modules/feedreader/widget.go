@@ -204,8 +204,24 @@ func (widget *Widget) content() (string, string, bool) {
 		lines := strings.Split(displayText, "\n")
 
 		moveTitle := widget.settings.maxHeight == 0 || widget.settings.maxHeight >= 2
-		if moveTitle && len(lines) > 0 {
-			lines = append([]string{""}, lines...)
+		if moveTitle && widget.showType != SHOW_LINK && len(lines) > 0 {
+			space := regexp.MustCompile(`\s+`)
+
+			source := ""
+			publishDate := ""
+
+			if widget.settings.showSource && feedItem.sourceTitle != "" {
+				source = fmt.Sprintf("[%s]%s ", widget.settings.source, feedItem.sourceTitle)
+			}
+			if widget.settings.showPublishDate && feedItem.item.Published != "" {
+				publishDate = fmt.Sprintf("[%s]%s ", widget.settings.publishDate, feedItem.item.PublishedParsed.Format(widget.settings.dateFormat))
+			}
+
+			titleText := space.ReplaceAllString(feedItem.item.Title, " ")
+			prefixLine := html.UnescapeString(source + publishDate)
+			titleLine := html.UnescapeString(fmt.Sprintf("[%s]%s", rowColor, titleText))
+
+			lines = append([]string{prefixLine, titleLine}, lines[1:]...)
 		}
 
 		if widget.settings.maxHeight > 0 && len(lines) > widget.settings.maxHeight {
@@ -216,16 +232,9 @@ func (widget *Widget) content() (string, string, bool) {
 		}
 
 		if len(lines) > 0 {
-			if moveTitle {
-				lines[0] = fmt.Sprintf("[%s]%2d.[white]", rowColor, idx+1)
-				for i := 1; i < len(lines); i++ {
-					lines[i] = fmt.Sprintf("[%s]%s[white]", rowColor, lines[i])
-				}
-			} else {
-				lines[0] = fmt.Sprintf("[%s]%2d. %s[white]", rowColor, idx+1, lines[0])
-				for i := 1; i < len(lines); i++ {
-					lines[i] = fmt.Sprintf("[%s]%s[white]", rowColor, lines[i])
-				}
+			lines[0] = fmt.Sprintf("[%s]%2d. %s[white]", rowColor, idx+1, lines[0])
+			for i := 1; i < len(lines); i++ {
+				lines[i] = fmt.Sprintf("[%s]%s[white]", rowColor, lines[i])
 			}
 		}
 

@@ -2,6 +2,8 @@ package feedreader
 
 import (
 	"fmt"
+	"html"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -106,18 +108,21 @@ func Test_widget_content_block(t *testing.T) {
 	rowColor := w.RowColor(0)
 	display := w.getShowText(w.stories[0], rowColor)
 	lines := strings.Split(display, "\n")
-	if w.settings.maxHeight == 0 || w.settings.maxHeight >= 2 {
-		lines = append([]string{""}, lines...)
+	moveTitle := w.settings.maxHeight == 0 || w.settings.maxHeight >= 2
+	if moveTitle && w.showType != SHOW_LINK && len(lines) > 0 {
+		space := regexp.MustCompile(`\s+`)
+		titleText := space.ReplaceAllString(w.stories[0].item.Title, " ")
+		prefixLine := ""
+		titleLine := html.UnescapeString(fmt.Sprintf("[%s]%s", rowColor, titleText))
+		lines = append([]string{prefixLine, titleLine}, lines[1:]...)
 	}
 	if w.settings.maxHeight > 0 && len(lines) > w.settings.maxHeight {
 		lines = lines[:w.settings.maxHeight]
 	}
-	if w.settings.maxHeight == 0 || w.settings.maxHeight >= 2 {
-		lines[0] = fmt.Sprintf("[%s]%2d.[white]", rowColor, 1)
-		for i := 1; i < len(lines); i++ {
-			lines[i] = fmt.Sprintf("[%s]%s[white]", rowColor, lines[i])
-		}
-	} else {
+	for len(lines) < w.settings.minHeight {
+		lines = append(lines, "")
+	}
+	if len(lines) > 0 {
 		lines[0] = fmt.Sprintf("[%s]%2d. %s[white]", rowColor, 1, lines[0])
 		for i := 1; i < len(lines); i++ {
 			lines[i] = fmt.Sprintf("[%s]%s[white]", rowColor, lines[i])
@@ -174,4 +179,5 @@ func Test_widget_title_second_line(t *testing.T) {
 
 	expectedTitle := "Cats           "
 	assert.Equal(t, expectedTitle, lines[1])
+	assert.Assert(t, strings.TrimSpace(lines[0]) != "", "first line should not be blank")
 }
