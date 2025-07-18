@@ -28,8 +28,8 @@ func Test_getShowLines(t *testing.T) {
 				item: &gofeed.Item{Title: "Cats and Dogs", Link: "https://cats.com"},
 			},
 			showType:  SHOW_TITLE,
-			expected1: "[white]Cats and Dogs",
-			expected2: "https://cats.com",
+			expected1: "https://cats.com",
+			expected2: "[white]Cats and Dogs",
 		},
 		{
 			name: "with link",

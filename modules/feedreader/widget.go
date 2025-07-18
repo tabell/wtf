@@ -253,7 +253,7 @@ func (widget *Widget) getShowLines(feedItem *FeedItem, rowColor string) (string,
 		}
 		return title, snippet
 	default:
-		return title, feedItem.item.Link
+		return feedItem.item.Link, title
 	}
 }
 
