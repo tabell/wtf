@@ -96,6 +96,16 @@ func Test_HighlightableHelper(t *testing.T) {
 	assert.Equal(t, "[\"0\"][\"\"]cats          [\"\"]\n", actual)
 }
 
+func Test_HighlightableBlockHelper(t *testing.T) {
+	view := tview.NewTextView()
+	lines := []string{"cats", "dogs"}
+
+	actual := HighlightableBlockHelper(view, lines, 0)
+
+	expected := "[\"0\"][\"\"]cats           \ndogs           [\"\"]\n"
+	assert.Equal(t, expected, actual)
+}
+
 func Test_RowPadding(t *testing.T) {
 	assert.Equal(t, "", RowPadding(0, 0))
 	assert.Equal(t, "", RowPadding(5, 2))
