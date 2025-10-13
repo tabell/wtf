@@ -6,15 +6,16 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	probing "github.com/prometheus-community/pro-bing"
 	"github.com/rivo/tview"
 	"github.com/wtfutil/wtf/view"
-	"github.com/prometheus-community/pro-bing"
 )
 
 // Widget is the container for your module's data
 type Widget struct {
 	view.TextWidget
-	targets []Target
+	hosts []Host
 
 	settings *Settings
 }
@@ -26,34 +27,33 @@ func NewWidget(tviewApp *tview.Application, redrawChan chan bool, settings *Sett
 
 		settings: settings,
 	}
-	widget.targets = widget.settings.targets
+	widget.hosts = widget.settings.hosts
 
 	return &widget
 }
 
 /* -------------------- Exported Functions -------------------- */
 
-
 func (widget *Widget) doPings() {
 	var wg sync.WaitGroup
-	for i := range widget.targets {
+	for i := range widget.hosts {
 		idx := i
-		target := widget.targets[idx]
-		widget.targets[idx].Up = false // reset to false each time
+		host := widget.hosts[idx]
+		widget.hosts[idx].Up = false // reset to false each time
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			pinger, err := probing.NewPinger(target.Host)
+			pinger, err := probing.NewPinger(host.Hostname)
 			if err == nil {
 				pinger.Count = 1
-				pinger.Timeout = 10*time.Second
+				pinger.Timeout = 10 * time.Second
 				err = pinger.Run() // Blocks until finished.
 				if err == nil {
 					stats := pinger.Statistics() // get send/receive/duplicate/rtt stats
 					if stats.PacketsRecv > 0 {
-						widget.targets[idx].Up = true
+						widget.hosts[idx].Up = true
 					} else {
-						widget.targets[idx].Up = false
+						widget.hosts[idx].Up = false
 					}
 				} else {
 					log.Fatalf("error sending ping: %v", err)
@@ -67,28 +67,28 @@ func (widget *Widget) doPings() {
 func (widget *Widget) Refresh() {
 
 	widget.doPings()
-    widget.display()
+	widget.display()
 }
 
 /* -------------------- Unexported Functions -------------------- */
 
 func (widget *Widget) content() string {
 	nameWidth := 12
-	for _,t := range widget.targets {
-		if len(t.Name) > nameWidth {
-			nameWidth = len(t.Name) + 2
+	for _, t := range widget.hosts {
+		if len(t.Label) > nameWidth {
+			nameWidth = len(t.Label) + 2
 		}
 	}
 
 	s := []string{}
-	for _,t := range widget.targets {
+	for _, t := range widget.hosts {
 		var status string
-		if t.Up == true {
+		if t.Up {
 			status = "[green]Up"
 		} else {
 			status = "[red]DOWN"
 		}
-		statusLine := fmt.Sprintf("[white]%-*s: %s", nameWidth, t.Name, status)
+		statusLine := fmt.Sprintf("[white]%-*s: %s", nameWidth, t.Label, status)
 		s = append(s, statusLine)
 	}
 
