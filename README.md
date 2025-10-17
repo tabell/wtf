@@ -54,6 +54,7 @@ Awesome! [See here](https://wtfutil.com/sponsors/exit_message/) for how you can 
 
 * [Installation](#installation)
     * [Installing via Homebrew](#installing-via-homebrew)
+    * [Installing via `go install`](#installing-via-go-install)
     * [Installing via MacPorts](#installing-via-macports)
     * [Installing a Binary](#installing-a-binary)
     * [Installing from Source](#installing-from-source)
@@ -93,6 +94,14 @@ brew tap wtfutil/wtfutil
 brew install wtfutil
 
 wtfutil
+```
+
+### Installing via `go install`
+
+Just run
+
+```sh
+go install github.com/wtfutil/wtf@latest
 ```
 
 ### Installing via MacPorts

@@ -47,7 +47,7 @@ require (
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
 	github.com/stretchr/testify v1.11.1
 	github.com/wtfutil/spotigopher v0.0.0-20191127141047-7d8168fe103a
-	github.com/wtfutil/todoist v0.0.2-0.20191216004217-0ec29ceda61a
+	github.com/wtfutil/todoist v0.5.0
 	github.com/xanzy/go-gitlab v0.96.0
 	github.com/zmb3/spotify v1.3.0
 	github.com/zorkian/go-datadog-api v2.30.0+incompatible
@@ -260,5 +260,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
-
-replace github.com/wtfutil/todoist => github.com/Seanstoppable/todoist v0.0.0-20221214042915-6505286e6b1e
