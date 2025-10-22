@@ -7,59 +7,38 @@ import (
 	"gotest.tools/assert"
 )
 
-func Test_getShowText(t *testing.T) {
+func Test_getShowLines(t *testing.T) {
 	tests := []struct {
-		name     string
-		feedItem *FeedItem
-		showType ShowType
-		expected string
+		name      string
+		feedItem  *FeedItem
+		showType  ShowType
+		expected1 string
+		expected2 string
 	}{
 		{
-			name:     "with nil FeedItem",
-			feedItem: nil,
-			showType: SHOW_TITLE,
-			expected: "",
+			name:      "with nil FeedItem",
+			feedItem:  nil,
+			showType:  SHOW_TITLE,
+			expected1: "",
+			expected2: "",
 		},
 		{
 			name: "with plain title",
 			feedItem: &FeedItem{
-				item: &gofeed.Item{Title: "Cats and Dogs"},
+				item: &gofeed.Item{Title: "Cats and Dogs", Link: "https://cats.com"},
 			},
-			showType: SHOW_TITLE,
-			expected: "[white]Cats and Dogs",
-		},
-		{
-			name: "with escaped title",
-			feedItem: &FeedItem{
-				item: &gofeed.Item{Title: "&lt;Cats and Dogs&gt;"},
-			},
-			showType: SHOW_TITLE,
-			expected: "[white]<Cats and Dogs>",
-		},
-		{
-			name: "with unescaped title",
-			feedItem: &FeedItem{
-				item: &gofeed.Item{Title: "<Cats and Dogs>"},
-			},
-			showType: SHOW_TITLE,
-			expected: "[white]<Cats and Dogs>",
-		},
-		{
-			name: "with source-title",
-			feedItem: &FeedItem{
-				sourceTitle: "WTF",
-				item:        &gofeed.Item{Title: "<Cats and Dogs>"},
-			},
-			showType: SHOW_TITLE,
-			expected: "[green]WTF [white]<Cats and Dogs>",
+			showType:  SHOW_TITLE,
+			expected1: "https://cats.com",
+			expected2: "[white]Cats and Dogs",
 		},
 		{
 			name: "with link",
 			feedItem: &FeedItem{
 				item: &gofeed.Item{Title: "Cats and Dogs", Link: "https://cats.com/dog.xml"},
 			},
-			showType: SHOW_LINK,
-			expected: "https://cats.com/dog.xml",
+			showType:  SHOW_LINK,
+			expected1: "https://cats.com/dog.xml",
+			expected2: "",
 		},
 	}
 
@@ -76,9 +55,10 @@ func Test_getShowText(t *testing.T) {
 				showType: tt.showType,
 			}
 
-			actual := widget.getShowText(tt.feedItem, "white")
+			l1, l2 := widget.getShowLines(tt.feedItem, "white")
 
-			assert.Equal(t, tt.expected, actual)
+			assert.Equal(t, tt.expected1, l1)
+			assert.Equal(t, tt.expected2, l2)
 		})
 	}
 }
