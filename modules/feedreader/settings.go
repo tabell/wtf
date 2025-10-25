@@ -30,6 +30,8 @@ type Settings struct {
 
 	feeds           []string        `help:"An array of RSS and Atom feed URLs"`
 	feedLimit       int             `help:"The maximum number of stories to display for each feed"`
+	maxHeight       int             `help:"Maximum number of lines to display for each item" optional:"true" default:"3"`
+	minHeight       int             `help:"Minimum number of lines to display for each item" optional:"true" default:"2"`
 	showSource      bool            `help:"Wether or not to show feed source in front of item titles." values:"true or false" optional:"true" default:"true"`
 	showPublishDate bool            `help:"Wether or not to show publish date in front of item titles." values:"true or false" optional:"true" default:"false"`
 	dateFormat      string          `help:"Date format to use for publish dates" values:"Any valid Go time layout which is handled by Time.Format" optional:"true" default:"Jan 02"`
@@ -44,6 +46,8 @@ func NewSettingsFromYAML(name string, ymlConfig, globalConfig *config.Config) *S
 		Common:          cfg.NewCommonSettingsFromModule(name, defaultTitle, defaultFocusable, ymlConfig, globalConfig),
 		feeds:           utils.ToStrs(ymlConfig.UList("feeds")),
 		feedLimit:       ymlConfig.UInt("feedLimit", -1),
+		maxHeight:       ymlConfig.UInt("maxHeight", 3),
+		minHeight:       ymlConfig.UInt("minHeight", 2),
 		showSource:      ymlConfig.UBool("showSource", true),
 		showPublishDate: ymlConfig.UBool("showPublishDate", false),
 		dateFormat:      ymlConfig.UString("dateFormat", "Jan 02"),

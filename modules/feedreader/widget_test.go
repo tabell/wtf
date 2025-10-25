@@ -1,9 +1,16 @@
 package feedreader
 
 import (
+	"fmt"
+	"html"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/mmcdole/gofeed"
+	"github.com/rivo/tview"
+	"github.com/wtfutil/wtf/cfg"
+	"github.com/wtfutil/wtf/utils"
 	"gotest.tools/assert"
 )
 
@@ -81,4 +88,96 @@ func Test_getShowText(t *testing.T) {
 			assert.Equal(t, tt.expected, actual)
 		})
 	}
+}
+
+func Test_widget_content_block(t *testing.T) {
+	app := tview.NewApplication()
+	w := NewWidget(app, make(chan bool), tview.NewPages(), &Settings{Common: &cfg.Common{}, maxHeight: 3})
+	w.showType = SHOW_CONTENT
+	w.stories = []*FeedItem{
+		{
+			item: &gofeed.Item{
+				Title:   "Cats",
+				Content: "<pre>one\ntwo\nthree\nfour</pre>",
+			},
+		},
+	}
+
+	title, content, wrap := w.content()
+
+	rowColor := w.RowColor(0)
+	display := w.getShowText(w.stories[0], rowColor)
+	lines := strings.Split(display, "\n")
+	moveTitle := w.settings.maxHeight == 0 || w.settings.maxHeight >= 2
+	if moveTitle && w.showType != SHOW_LINK && len(lines) > 0 {
+		space := regexp.MustCompile(`\s+`)
+		titleText := space.ReplaceAllString(w.stories[0].item.Title, " ")
+		prefixLine := ""
+		titleLine := html.UnescapeString(fmt.Sprintf("[%s]%s", rowColor, titleText))
+		lines = append([]string{prefixLine, titleLine}, lines[1:]...)
+	}
+	if w.settings.maxHeight > 0 && len(lines) > w.settings.maxHeight {
+		lines = lines[:w.settings.maxHeight]
+	}
+	for len(lines) < w.settings.minHeight {
+		lines = append(lines, "")
+	}
+	if len(lines) > 0 {
+		lines[0] = fmt.Sprintf("[%s]%2d. %s[white]", rowColor, 1, lines[0])
+		for i := 1; i < len(lines); i++ {
+			lines[i] = fmt.Sprintf("[%s]%s[white]", rowColor, lines[i])
+		}
+	}
+	expected := utils.HighlightableBlockHelper(w.View, lines, 0)
+
+	assert.Equal(t, w.CommonSettings().Title, title)
+	assert.Equal(t, expected, content)
+	assert.Equal(t, true, wrap)
+}
+
+func Test_widget_content_min_height(t *testing.T) {
+	app := tview.NewApplication()
+	w := NewWidget(app, make(chan bool), tview.NewPages(), &Settings{Common: &cfg.Common{}, minHeight: 2})
+	w.showType = SHOW_TITLE
+	w.stories = []*FeedItem{
+		{
+			item: &gofeed.Item{
+				Title: "Cats",
+			},
+		},
+	}
+
+	_, content, _ := w.content()
+
+	expectedLines := 2
+	actualLines := strings.Count(content, "\n")
+	assert.Equal(t, expectedLines, actualLines)
+}
+
+func Test_widget_title_second_line(t *testing.T) {
+	app := tview.NewApplication()
+	w := NewWidget(app, make(chan bool), tview.NewPages(), &Settings{Common: &cfg.Common{}, maxHeight: 3})
+	w.showType = SHOW_CONTENT
+	w.stories = []*FeedItem{
+		{
+			item: &gofeed.Item{
+				Title:   "Cats",
+				Content: "<pre>meow</pre>",
+			},
+		},
+	}
+
+	_, content, _ := w.content()
+
+	// strip highlight regions and padding for easier comparison
+	cleaned := utils.StripColorTags(strings.ReplaceAll(content, "[\"0\"][\"\"]", ""))
+	lines := strings.Split(cleaned, "\n")
+
+	if len(lines) < 2 {
+		t.Fatalf("expected at least 2 lines, got %d", len(lines))
+	}
+
+	expectedTitle := "Cats           "
+	assert.Equal(t, expectedTitle, lines[1])
+	assert.Assert(t, strings.TrimSpace(lines[0]) != "", "first line should not be blank")
 }

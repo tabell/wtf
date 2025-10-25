@@ -79,6 +79,28 @@ func HighlightableHelper(view *tview.TextView, input string, idx, offset int) st
 	return fmtStr
 }
 
+// HighlightableBlockHelper pads each line of a multiline block with spaces so
+// that the block spans the full width of the view. It wraps the entire block in
+// a region so that all lines are highlighted together when selected.
+func HighlightableBlockHelper(view *tview.TextView, lines []string, idx int) string {
+	_, _, w, _ := view.GetInnerRect()
+
+	fmtStr := fmt.Sprintf(`["%d"][""]`, idx)
+
+	for i, line := range lines {
+		visibleWidth := len([]rune(StripColorTags(line)))
+		fmtStr += line
+		fmtStr += RowPadding(visibleWidth, w)
+		if i < len(lines)-1 {
+			fmtStr += "\n"
+		}
+	}
+
+	fmtStr += `[""]` + "\n"
+
+	return fmtStr
+}
+
 // RowPadding returns a padding for a row to make it the full width of the containing widget.
 // Useful for ensuring row highlighting spans the full width (I suspect tcell has a better
 // way to do this, but I haven't yet found it)
