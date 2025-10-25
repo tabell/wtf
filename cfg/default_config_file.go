@@ -52,6 +52,8 @@ const defaultConfigFile = `wtf:
       enabled: true
       feeds:
       - https://feeds.bbci.co.uk/news/rss.xml
+      feedAliases:
+        "https://feeds.bbci.co.uk/news/rss.xml": BBC
       feedLimit: 10
       position:
         top: 1

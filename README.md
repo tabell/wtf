@@ -237,6 +237,16 @@ Some interesting modules you might consider adding to get you started:
 * [Transmission](https://wtfutil.com/modules/transmission/)
 * [Trello](https://wtfutil.com/modules/trello/)
 
+FeedReader allows mapping long feed URLs to short titles using `feedAliases`:
+
+```yaml
+feedreader:
+  feeds:
+    - https://feeds.bbci.co.uk/news/rss.xml
+  feedAliases:
+    "https://feeds.bbci.co.uk/news/rss.xml": BBC
+```
+
 ## Getting Bugs Fixed or Features Added
 
 WTF is open-source software, informally maintained by a small collection of volunteers who come and go at their leisure. There are absolutely no guarantees that, even if an issue is opened for them, bugs will be fixed or features added.
